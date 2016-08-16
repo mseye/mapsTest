@@ -1,4 +1,7 @@
 // Ionic Starter App
+//
+// Maps setup with help from: http://www.joshmorony.com/integrating-google-maps-with-an-ionic-application/
+
 
 // angular.module is a global place for creating, registering and retrieving Angular modules
 // 'starter' is the name of this angular module example (also set in a <body> attribute in index.html)

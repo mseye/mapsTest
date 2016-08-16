@@ -1,14 +1,19 @@
 <ion-view>
     <ion-content>
 
-        <div id="map" data-tap-disabled="true"></div>
+        <style>
+            .scroll {
+                height: 100%;
+            }
+            
+            #map {
+                width: 100%;
+                height: 100%;
+            }
+        </style>
 
-        <!-- footer to show when user is offline -->
-        <div class="bar bar-footer bar-assertive" ng-if="!online">
-            <div class="title">
-                Offline
-            </div>
-        </div>
+
+        <div id="map" data-tap-disabled="true"></div>
 
     </ion-content>
 

@@ -1,35 +1,23 @@
 angular.module('starter')
 
-.controller('MapCtrl', function($scope, $state, $cordovaGeolocation, $cordovaCamera, ConnectivityMonitor, CommandService) {
+.controller('MapCtrl', function($scope, $state, $cordovaGeolocation, ConnectivityMonitor, MapService, CommandService, CameraService) {
 
     var defaults = {
         defaultZoom: 17,
-        maxZoom: 21
+        maxZoom: 21,
     };
 
     // subscribe to the camera button in the header
     CommandService.subscribe('camera', function() {
+        // zoom in
         $scope.map.setZoom(defaults.maxZoom);
-        var options = {
-            quality: 75,
-            destinationType: Camera.DestinationType.DATA_URL,
-            sourceType: Camera.PictureSourceType.CAMERA,
-            allowEdit: true,
-            encodingType: Camera.EncodingType.JPEG,
-            targetWidth: 300,
-            targetHeight: 300,
-            popoverOptions: CameraPopoverOptions,
-            saveToPhotoAlbum: false
-        };
 
-        $cordovaCamera.getPicture(options).then(function(imageData) {
-            $scope.imgURI = "data:image/jpeg;base64," + imageData;
-        }, function(err) {
-            // An error occured. Show a message to the user
-        });
+        var center = $scope.map.getCenter();
+        console.log('center: ', center);
+
+        CameraService.OpenCamera();
+
     });
-
-
 
 
     // Get location, then setup map with pin
@@ -39,44 +27,42 @@ angular.module('starter')
     };
     $cordovaGeolocation.getCurrentPosition(geoLocationOptions).then(function(position) {
 
-        console.log('current position: ', position);
+            console.log('current position: ', position);
 
-        var latLng = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
+            var latLng = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
 
-        var mapOptions = {
-            center: latLng,
-            zoom: defaults.defaultZoom,
-            mapTypeId: google.maps.MapTypeId.ROADMAP
-        };
+            var mapOptions = {
+                center: latLng,
+                zoom: defaults.defaultZoom,
+                mapTypeId: google.maps.MapTypeId.ROADMAP
+            };
 
-
-        $scope.map = new google.maps.Map(document.getElementById("map"), mapOptions);
-
+            $scope.map = new google.maps.Map(document.getElementById("map"), mapOptions);
 
 
-        //Wait until the map is loaded, add marker
-        google.maps.event.addListenerOnce($scope.map, 'idle', function() {
+            //Wait until the map is loaded (idle event fired), add marker
+            google.maps.event.addListenerOnce($scope.map, 'idle', function() {
 
-            var marker = new google.maps.Marker({
-                map: $scope.map,
-                animation: google.maps.Animation.DROP,
-                position: latLng
-            });
-            var infoWindow = new google.maps.InfoWindow({
-                content: "Here I am baby!"
-            });
+                MapService.NewMarker($scope.map, {
+                    //position: position,
+                    content: "here I am",
+                    onclick: function(m) {
+                        console.log('marker clicked', m);
+                    }
+                });
 
-            google.maps.event.addListener(marker, 'click', function() {
-                console.click('map clicked');
-                infoWindow.open($scope.map, marker);
             });
 
+            google.maps.event.addListener($scope.map, 'click', function(d) {
+                console.log('map clicked: ', d);
+                MapService.NewMarker($scope.map, {
+                    position: d.latLng
+                });
+                $scope.map.setCenter(d.latLng);
+            });
+
+        },
+        function(error) {
+            console.log("Could not get location");
         });
-
-
-
-
-    }, function(error) {
-        console.log("Could not get location");
-    });
 });

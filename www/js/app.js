@@ -3,15 +3,13 @@
 // Maps setup with help from: http://www.joshmorony.com/integrating-google-maps-with-an-ionic-application/
 // Next steps: http://www.joshmorony.com/part-3-advanced-google-maps-integration-with-ionic-and-remote-data/
 
-
-// angular.module is a global place for creating, registering and retrieving Angular modules
-// 'starter' is the name of this angular module example (also set in a <body> attribute in index.html)
-// the 2nd parameter is an array of 'requires'
 angular.module('starter', ['ionic', 'ngCordova'])
 
+// Configure ionic framework
 .run(function($ionicPlatform) {
   $ionicPlatform.ready(function() {
-    if(window.cordova && window.cordova.plugins.Keyboard) {
+    if (window.cordova && window.cordova.plugins.Keyboard) {
+
       // Hide the accessory bar by default (remove this to show the accessory bar above the keyboard
       // for form inputs)
       cordova.plugins.Keyboard.hideKeyboardAccessoryBar(true);
@@ -21,119 +19,8 @@ angular.module('starter', ['ionic', 'ngCordova'])
       // a much nicer keyboard experience.
       cordova.plugins.Keyboard.disableScroll(true);
     }
-    if(window.StatusBar) {
+    if (window.StatusBar) {
       StatusBar.styleDefault();
     }
   });
-})
-// Configure the state provider (navigation between pages)
-.config(function($stateProvider, $urlRouterProvider) {
- 
-  $stateProvider
-  .state('map', {
-    url: '/',
-    templateUrl: 'templates/map.html',
-    controller: 'MapCtrl'
-  });
- 
-  $urlRouterProvider.otherwise("/");
- 
-})
-
-.controller('MapCtrl', function($scope, $state, $cordovaGeolocation, ConnectivityMonitor) {
- var options = {timeout: 10000, enableHighAccuracy: true};
-
-  $cordovaGeolocation.getCurrentPosition(options).then(function(position){
- 
-    var latLng = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
- 
-    var mapOptions = {
-      center: latLng,
-      zoom: 15,
-      mapTypeId: google.maps.MapTypeId.ROADMAP
-    };
- 
-    $scope.map = new google.maps.Map(document.getElementById("map"), mapOptions);
- 
-    //Wait until the map is loaded, add marker
-    google.maps.event.addListenerOnce($scope.map, 'idle', function(){
-    
-      var marker = new google.maps.Marker({
-          map: $scope.map,
-          animation: google.maps.Animation.DROP,
-          position: latLng
-      });
-      var infoWindow = new google.maps.InfoWindow({
-          content: "Here I am!"
-      });
-    
-      google.maps.event.addListener(marker, 'click', function () {
-          infoWindow.open($scope.map, marker);
-      });  
-    
-    });
-
-  }, function(error){
-    console.log("Could not get location");
-  });
-
-  //online/offline indicator
-  $scope.online = ConnectivityMonitor.isOnline;
-  ConnectivityMonitor.startWatching(
-    function (onlineStatus) { 
-      $scope.online = onlineStatus;
-     }
-  )
-
-})
-
-.factory('ConnectivityMonitor', function($rootScope, $cordovaNetwork){
- 
-  return {
-    isOnline: function(){
- 
-      if(ionic.Platform.isWebView()){
-        return $cordovaNetwork.isOnline();    
-      } else {
-        return navigator.onLine;
-      }
- 
-    },
-    isOffline: function(){
- 
-      if(ionic.Platform.isWebView()){
-        return !$cordovaNetwork.isOnline();    
-      } else {
-        return !navigator.onLine;
-      }
- 
-    },
-    startWatching: function(callback){
-        if(ionic.Platform.isWebView()){
- 
-          $rootScope.$on('$cordovaNetwork:online', function(event, networkState){
-            console.log("went online");
-            callback(true);
-          });
- 
-          $rootScope.$on('$cordovaNetwork:offline', function(event, networkState){
-            console.log("went offline");
-            callback(false);
-          });
- 
-        }
-        else {
- 
-          window.addEventListener("online", function(e) {
-            console.log("went online");
-            callback(true);
-          }, false);    
- 
-          window.addEventListener("offline", function(e) {
-            console.log("went offline");
-            callback(false);
-          }, false);  
-        }       
-    }
-  }
-})
+});

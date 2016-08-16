@@ -1,6 +1,7 @@
 // Ionic Starter App
 //
 // Maps setup with help from: http://www.joshmorony.com/integrating-google-maps-with-an-ionic-application/
+// Next steps: http://www.joshmorony.com/part-3-advanced-google-maps-integration-with-ionic-and-remote-data/
 
 
 // angular.module is a global place for creating, registering and retrieving Angular modules
@@ -39,9 +40,9 @@ angular.module('starter', ['ionic', 'ngCordova'])
  
 })
 
-.controller('MapCtrl', function($scope, $state, $cordovaGeolocation) {
+.controller('MapCtrl', function($scope, $state, $cordovaGeolocation, ConnectivityMonitor) {
  var options = {timeout: 10000, enableHighAccuracy: true};
- 
+
   $cordovaGeolocation.getCurrentPosition(options).then(function(position){
  
     var latLng = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
@@ -75,4 +76,64 @@ angular.module('starter', ['ionic', 'ngCordova'])
   }, function(error){
     console.log("Could not get location");
   });
-});
+
+  //online/offline indicator
+  $scope.online = ConnectivityMonitor.isOnline;
+  ConnectivityMonitor.startWatching(
+    function (onlineStatus) { 
+      $scope.online = onlineStatus;
+     }
+  )
+
+})
+
+.factory('ConnectivityMonitor', function($rootScope, $cordovaNetwork){
+ 
+  return {
+    isOnline: function(){
+ 
+      if(ionic.Platform.isWebView()){
+        return $cordovaNetwork.isOnline();    
+      } else {
+        return navigator.onLine;
+      }
+ 
+    },
+    isOffline: function(){
+ 
+      if(ionic.Platform.isWebView()){
+        return !$cordovaNetwork.isOnline();    
+      } else {
+        return !navigator.onLine;
+      }
+ 
+    },
+    startWatching: function(callback){
+        if(ionic.Platform.isWebView()){
+ 
+          $rootScope.$on('$cordovaNetwork:online', function(event, networkState){
+            console.log("went online");
+            callback(true);
+          });
+ 
+          $rootScope.$on('$cordovaNetwork:offline', function(event, networkState){
+            console.log("went offline");
+            callback(false);
+          });
+ 
+        }
+        else {
+ 
+          window.addEventListener("online", function(e) {
+            console.log("went online");
+            callback(true);
+          }, false);    
+ 
+          window.addEventListener("offline", function(e) {
+            console.log("went offline");
+            callback(false);
+          }, false);  
+        }       
+    }
+  }
+})

@@ -1,5 +1,10 @@
 <ion-view>
     <ion-content>
         <div id="map" data-tap-disabled="true"></div>
+        <div class="bar bar-footer bar-assertive" ng-if="!online">
+            <div class="title">
+                Offline
+            </div>
+        </div>
     </ion-content>
 </ion-view>

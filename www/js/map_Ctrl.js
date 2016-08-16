@@ -1,20 +1,39 @@
 angular.module('starter')
 
-.controller('MapCtrl', function($scope, $state, $cordovaGeolocation, ConnectivityMonitor) {
-    var options = {
+.controller('MapCtrl', function($scope, $state, $cordovaGeolocation, ConnectivityMonitor, CommandService) {
+
+    var defaults = {
+            defaultZoom: 17,
+            maxZoom: 21
+        }
+        // subscribe to the add button in the header
+    CommandService.subscribe('add', function() {
+        $scope.map.setZoom(defaults.maxZoom);
+    });
+
+    // online/offline indicator
+    $scope.online = ConnectivityMonitor.isOnline;
+    ConnectivityMonitor.startWatching(
+        function(onlineStatus) {
+            $scope.online = onlineStatus;
+        }
+    )
+
+    // Get location, then setup map with pin
+    var geoLocationOptions = {
         timeout: 10000,
         enableHighAccuracy: true
     };
-
-    $cordovaGeolocation.getCurrentPosition(options).then(function(position) {
+    $cordovaGeolocation.getCurrentPosition(geoLocationOptions).then(function(position) {
 
         var latLng = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
 
         var mapOptions = {
             center: latLng,
-            zoom: 15,
+            zoom: defaults.defaultZoom,
             mapTypeId: google.maps.MapTypeId.ROADMAP
         };
+
 
         $scope.map = new google.maps.Map(document.getElementById("map"), mapOptions);
 
@@ -40,12 +59,6 @@ angular.module('starter')
         console.log("Could not get location");
     });
 
-    //online/offline indicator
-    $scope.online = ConnectivityMonitor.isOnline;
-    ConnectivityMonitor.startWatching(
-        function(onlineStatus) {
-            $scope.online = onlineStatus;
-        }
-    )
+
 
 });

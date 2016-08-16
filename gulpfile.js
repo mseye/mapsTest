@@ -10,7 +10,10 @@ var sh = require('shelljs');
 
 var paths = {
   sass: ['./scss/**/*.scss'],
-  javascript: ['./www/js/*']
+  javascript: [
+    './www/js/*',
+    '!www/js/app.js' // exclude main app file
+  ]
 };
 
 gulp.task('default', ['sass', 'inject-js']);

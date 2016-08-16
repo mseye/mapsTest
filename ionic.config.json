@@ -1,0 +1,12 @@
+{
+  "name": "mapsTest",
+  "app_id": "402353ca",
+  "gulpStartupTasks": [
+    "sass",
+    "watch"
+  ],
+  "watchPatterns": [
+    "www/**/*",
+    "!www/lib/**/*"
+  ]
+}
